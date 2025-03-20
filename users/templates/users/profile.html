@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}个人中心{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>个人信息</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary">保存修改</button>
+        </form>
+        
+        <h3 class="mt-5">我发布的书籍</h3>
+        <div class="row">
+            {% for book in user.books.all %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        {% if book.image %}
+                            <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <p class="card-text">
+                                价格: ¥{{ book.price }}<br>
+                                状态: {% if book.is_sold %}已售出{% else %}在售{% endif %}
+                            </p>
+                            <a href="{% url 'books:book_detail' book.id %}" class="btn btn-primary">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p>您还没有发布任何书籍</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

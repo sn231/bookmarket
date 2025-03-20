@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}书籍列表{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 分类导航 -->
+    <div class="category-nav mb-4">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link {% if not category %}active{% endif %}" href="{% url 'books:book_list' %}">全部</a>
+            </li>
+            {% for cat in categories %}
+                <li class="nav-item">
+                    <a class="nav-link {% if category == cat.slug %}active{% endif %}" 
+                       href="{% url 'books:book_list' %}?category={{ cat.slug }}">
+                        {{ cat.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 高级筛选器 -->
+    <div class="filter-section mb-4">
+        <div class="card">
+            <div class="card-body">
+                <form class="form-inline" method="get">
+                    <div class="row w-100">
+                        <div class="col-md-3">
+                            <select name="condition" class="form-control w-100">
+                                <option value="">所有成色</option>
+                                {% for value, label in conditions %}
+                                    <option value="{{ value }}" {% if request.GET.condition == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <input type="number" name="min_price" class="form-control" 
+                                       placeholder="最低价格" value="{{ request.GET.min_price }}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">¥</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <input type="number" name="max_price" class="form-control" 
+                                       placeholder="最高价格" value="{{ request.GET.max_price }}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">¥</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="sort" class="form-control w-100">
+                                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>最新发布</option>
+                                <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>价格从低到高</option>
+                                <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>价格从高到低</option>
+                                <option value="popular" {% if sort == 'popular' %}selected{% endif %}>最受欢迎</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row w-100 mt-3">
+                        <div class="col-md-12 text-right">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter mr-1"></i>应用筛选
+                            </button>
+                            <a href="{% url 'books:book_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-redo mr-1"></i>重置
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 书籍列表 -->
+    <div class="row" id="booksList">
+        {% for book in books %}
+            <div class="col-md-3 mb-4">
+                <div class="card book-card h-100">
+                    <div class="card-img-wrapper">
+                        {% if book.image %}
+                            <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                        {% endif %}
+                        <div class="card-img-overlay">
+                            <button class="btn btn-sm btn-favorite {% if book in user.favorite_books.all %}active{% endif %}"
+                                    data-book-id="{{ book.id }}" title="收藏">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="btn btn-sm btn-share" data-book-id="{{ book.id }}" title="分享">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">{{ book.title }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">{{ book.author }}</small><br>
+                            <span class="price-tag">¥{{ book.price }}</span>
+                            {% if book.original_price %}
+                                <small class="text-muted"><del>¥{{ book.original_price }}</del></small>
+                            {% endif %}
+                        </p>
+                        <div class="book-meta">
+                            <span class="condition-tag condition-{{ book.condition }}">
+                                {{ book.get_condition_display }}
+                            </span>
+                            <span class="views-count">
+                                <i class="fas fa-eye"></i> {{ book.views }}
+                            </span>
+                            <span class="likes-count">
+                                <i class="fas fa-heart"></i> {{ book.favorites.count }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100">
+                            <a href="{% url 'books:book_detail' book.id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-info-circle mr-1"></i>详情
+                            </a>
+                            <button class="btn btn-outline-success add-to-cart" data-book-id="{{ book.id }}">
+                                <i class="fas fa-shopping-cart mr-1"></i>购买
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="empty-state text-center">
+                    <img src="{% static 'images/empty-books.svg' %}" alt="暂无书籍" class="mb-3">
+                    <h3>暂无相关书籍</h3>
+                    <p class="text-muted">试试其他筛选条件，或者发布一本书籍</p>
+                    <a href="{% url 'books:book_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i>发布书籍
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- 加载更多 -->
+    <div class="text-center mt-4 mb-4">
+        <div class="loading spinner-border text-primary" role="status" style="display: none;">
+            <span class="sr-only">加载中...</span>
+        </div>
+        {% if books.has_next %}
+            <button id="loadMoreBtn" class="btn btn-outline-primary" data-page="{{ books.number }}">
+                <i class="fas fa-sync-alt mr-1"></i>加载更多
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- 分享弹窗 -->
+    <div class="modal fade" id="shareModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">分享书籍</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="share-buttons">
+                        <button class="btn btn-weixin"><i class="fab fa-weixin"></i> 微信</button>
+                        <button class="btn btn-weibo"><i class="fab fa-weibo"></i> 微博</button>
+                        <button class="btn btn-qq"><i class="fab fa-qq"></i> QQ</button>
+                        <button class="btn btn-link copy-link">
+                            <i class="fas fa-link"></i> 复制链接
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 当前页码
+    window.currentPage = "{{ page_obj.number|default:1 }}";
+    
+    // 收藏功能
+    $('.btn-favorite').click(function(e) {
+        e.preventDefault();
+        const btn = $(this);
+        const bookId = btn.data('book-id');
+        
+        $.post('/books/toggle-favorite/' + bookId + '/')
+            .done(function(response) {
+                if (response.status === 'added') {
+                    btn.addClass('active');
+                } else {
+                    btn.removeClass('active');
+                }
+                // 更新收藏数
+                btn.closest('.book-card').find('.likes-count').text(response.count);
+            });
+    });
+
+    // 加入购物车
+    $('.add-to-cart').click(function(e) {
+        e.preventDefault();
+        const bookId = $(this).data('book-id');
+        
+        $.ajax({
+            url: `/books/cart/add/${bookId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // 更新购物车数量显示
+                    $('#cart-count').text(response.cart_count);
+                    
+                    // 显示成功提示
+                    Swal.fire({
+                        title: '添加成功',
+                        text: response.message,
+                        icon: 'success',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '去购物车',
+                        cancelButtonText: '继续购物'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{% url 'books:cart' %}";
+                        }
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire('错误', '添加到购物车失败，请重试', 'error');
+            }
+        });
+    });
+
+    // 分享功能
+    $('.btn-share').click(function() {
+        const bookId = $(this).data('book-id');
+        $('#shareModal').modal('show');
+    });
+
+    // 复制链接
+    $('.copy-link').click(function() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(function() {
+            Swal.fire({
+                icon: 'success',
+                title: '链接已复制',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        });
+    });
+
+    // 无限滚动加载
+    $('#loadMoreBtn').click(function() {
+        const btn = $(this);
+        const loading = $('.loading');
+        const nextPage = parseInt(window.currentPage) + 1;
+        
+        btn.hide();
+        loading.show();
+        
+        $.get(`/books/load-more/?page=${nextPage}`)
+            .done(function(response) {
+                if (response.books && response.books.length > 0) {
+                    response.books.forEach(function(book) {
+                        const bookHtml = `
+                            <div class="col-md-3 mb-4">
+                                <div class="card book-card h-100">
+                                    <!-- 书籍卡片内容 -->
+                                </div>
+                            </div>
+                        `;
+                        $('#booksList').append(bookHtml);
+                    });
+                    window.currentPage = nextPage;
+                    if (response.has_next) {
+                        btn.show();
+                    }
+                }
+                loading.hide();
+            })
+            .fail(function() {
+                loading.hide();
+                btn.show();
+            });
+    });
+</script>
+{% endblock %}

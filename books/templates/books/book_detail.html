@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            {% if book.image %}
+                <img src="{{ book.image.url }}" class="img-fluid rounded" alt="{{ book.title }}">
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h2>{{ book.title }}</h2>
+            <p class="text-muted">作者: {{ book.author }}</p>
+            <p>
+                <span class="price-tag">¥{{ book.price }}</span>
+                <small class="text-muted ml-2">原价: ¥{{ book.original_price }}</small>
+            </p>
+            <p>
+                成色: <span class="condition-tag condition-{{ book.condition }}">
+                    {{ book.get_condition_display }}
+                </span>
+            </p>
+            <p>描述: {{ book.description }}</p>
+            <p>卖家: {{ book.seller.username }}</p>
+            <p>库存: <span class="badge badge-info">{{ book.stock }}</span> 本</p>
+            
+            {% if user.is_authenticated and user != book.seller %}
+                {% if book.stock > 0 %}
+                    <div class="mb-3">
+                        <div class="input-group" style="max-width: 200px;">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-outline-secondary decrease-quantity" type="button">-</button>
+                            </div>
+                            <input type="number" class="form-control text-center purchase-quantity" value="1" min="1" max="{{ book.stock }}">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary increase-quantity" type="button">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary add-to-cart" data-book-id="{{ book.id }}">
+                        <i class="fas fa-shopping-cart mr-1"></i>加入购物车
+                    </button>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>该书已售罄
+                    </div>
+                {% endif %}
+                <a href="{% url 'messages:message_create' book.id %}" class="btn btn-outline-primary ml-2">
+                    <i class="fas fa-comment mr-1"></i>联系卖家
+                </a>
+            {% endif %}
+            
+            {% if user == book.seller %}
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">库存管理</h5>
+                        <form method="post" action="{% url 'books:update_stock' book.id %}" class="form-inline">
+                            {% csrf_token %}
+                            <div class="form-group mr-2">
+                                <label for="stock" class="mr-2">更新库存:</label>
+                                <input type="number" class="form-control" id="stock" name="stock" 
+                                       value="{{ book.stock }}" min="0" style="width: 100px;">
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save mr-1"></i>保存
+                            </button>
+                        </form>
+                        <div class="btn-group mt-3">
+                            <a href="{% url 'books:book_update' book.id %}" class="btn btn-warning">
+                                <i class="fas fa-edit mr-1"></i>编辑
+                            </a>
+                            <a href="{% url 'books:book_delete' book.id %}" class="btn btn-danger">
+                                <i class="fas fa-trash mr-1"></i>删除
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if message_history %}
+    <div class="row mt-4">
+        <div class="col-md-8 offset-md-2">
+            <h4>消息记录</h4>
+            <div class="message-history">
+                {% for msg in message_history %}
+                    <div class="message {% if msg.sender == user %}message-sent{% else %}message-received{% endif %}">
+                        <div class="message-content">
+                            {{ msg.content }}
+                        </div>
+                        <small class="text-muted">{{ msg.created_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if related_books %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <h4>卖家的其他书籍</h4>
+        </div>
+        {% for related_book in related_books %}
+            <div class="col-md-3">
+                <div class="card">
+                    {% if related_book.image %}
+                        <img src="{{ related_book.image.url }}" class="card-img-top" alt="{{ related_book.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="card-title">{{ related_book.title }}</h6>
+                        <p class="card-text">
+                            <span class="price-tag">¥{{ related_book.price }}</span>
+                            <small class="d-block">库存: {{ related_book.stock }} 本</small>
+                        </p>
+                        <a href="{% url 'books:book_detail' related_book.id %}" class="btn btn-sm btn-primary">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 数量增减功能
+    $('.decrease-quantity').click(function() {
+        var input = $('.purchase-quantity');
+        var currentValue = parseInt(input.val());
+        if (currentValue > 1) {
+            input.val(currentValue - 1);
+        }
+    });
+
+    $('.increase-quantity').click(function() {
+        var input = $('.purchase-quantity');
+        var currentValue = parseInt(input.val());
+        var maxValue = parseInt(input.attr('max'));
+        if (currentValue < maxValue) {
+            input.val(currentValue + 1);
+        }
+    });
+
+    // 加入购物车
+    $('.add-to-cart').click(function() {
+        var bookId = $(this).data('book-id');
+        var quantity = $('.purchase-quantity').val();
+        
+        $.ajax({
+            url: `/books/cart/add/${bookId}/`,
+            method: 'POST',
+            data: {
+                quantity: quantity,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#cart-count').text(response.cart_count);
+                    Swal.fire({
+                        title: '添加成功',
+                        text: response.message,
+                        icon: 'success',
+                        showCancelButton: true,
+                        confirmButtonText: '去购物车',
+                        cancelButtonText: '继续购物'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{% url 'books:cart' %}";
+                        }
+                    });
+                } else {
+                    Swal.fire('错误', response.message, 'error');
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

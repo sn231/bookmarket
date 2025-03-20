@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}管理员仪表板{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">管理员仪表板</h2>
+    
+    <!-- 统计卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">总用户数</h5>
+                    <h2 class="card-text">{{ stats.total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">总书籍数</h5>
+                    <h2 class="card-text">{{ stats.total_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">总订单数</h5>
+                    <h2 class="card-text">{{ stats.total_orders }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">待处理订单</h5>
+                    <h2 class="card-text">{{ stats.pending_orders }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近用户和订单 -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">最近注册用户</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>用户名</th>
+                                    <th>注册时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in stats.recent_users %}
+                                    <tr>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.date_joined|date:"Y-m-d H:i" }}</td>
+                                        <td>
+                                            <a href="{% url 'users:admin_user_update' user.pk %}" 
+                                               class="btn btn-sm btn-primary">
+                                                编辑
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">最近订单</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>订单号</th>
+                                    <th>买家</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in stats.recent_orders %}
+                                    <tr>
+                                        <td>{{ order.order_number }}</td>
+                                        <td>{{ order.buyer.username }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ order.status|yesno:'success,warning,danger' }}">
+                                                {{ order.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'users:admin_order_update' order.pk %}" 
+                                               class="btn btn-sm btn-primary">
+                                                处理
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">快捷操作</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group">
+                        <a href="{% url 'users:admin_user_list' %}" class="btn btn-primary">
+                            <i class="fas fa-users mr-1"></i>用户管理
+                        </a>
+                        <a href="{% url 'users:admin_order_list' %}" class="btn btn-success">
+                            <i class="fas fa-shopping-cart mr-1"></i>订单管理
+                        </a>
+                        <a href="{% url 'users:admin_book_list' %}" class="btn btn-info">
+                            <i class="fas fa-book mr-1"></i>书籍管理
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

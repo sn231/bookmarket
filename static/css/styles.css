@@ -1,0 +1,542 @@
+/* 全局样式 */
+body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background-color: #f8f9fa;
+    margin: 20px;
+}
+
+h1 {
+    color: #333;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+/* 导航栏样式 */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* 卡片样式 */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,.2);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* 按钮样式 */
+.btn {
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* 表单样式 */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 10px 15px;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* 消息通知样式 */
+.unread-badge {
+    position: relative;
+}
+
+.unread-badge::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -5px;
+    width: 8px;
+    height: 8px;
+    background-color: #dc3545;
+    border-radius: 50%;
+}
+
+/* 搜索框容器样式 */
+.search-form {
+    position: relative;
+    margin-bottom: 0;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+/* 搜索框样式 */
+.search-input {
+    width: 100%;
+    border-radius: 20px;
+    padding: 8px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.search-input:focus {
+    background-color: white;
+    color: #333;
+}
+
+/* 搜索结果容器样式 */
+#searchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 1050;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 5px;
+}
+
+/* 暂无书籍提示样式 */
+.no-books-message {
+    font-size: 1.2rem;
+    color: #6c757d;
+    padding: 2rem;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+/* 加载动画容器样式 */
+.loading {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 分页样式 */
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-link {
+    border-radius: 4px;
+    margin: 0 2px;
+}
+
+/* 标签样式 */
+.badge {
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* 价格标签 */
+.price-tag {
+    background-color: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* 书籍状态标签 */
+.condition-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.condition-new { background-color: #28a745; color: white; }
+.condition-like-new { background-color: #17a2b8; color: white; }
+.condition-good { background-color: #ffc107; color: black; }
+.condition-acceptable { background-color: #6c757d; color: white; }
+
+/* 响应式布局调整 */
+@media (max-width: 768px) {
+    .card-img-top {
+        height: 150px;
+    }
+    
+    .container {
+        padding: 0 15px;
+    }
+
+    .search-form {
+        min-width: auto;
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .navbar-nav {
+        width: 100%;
+    }
+}
+
+/* 消息历史样式 */
+.message-history {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.message {
+    margin-bottom: 15px;
+    max-width: 80%;
+}
+
+.message-sent {
+    margin-left: auto;
+}
+
+.message-received {
+    margin-right: auto;
+}
+
+.message-content {
+    padding: 10px 15px;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.message-sent .message-content {
+    background: #007bff;
+    color: #fff;
+}
+
+.message-received .message-content {
+    background: #e9ecef;
+}
+
+/* 消息通知样式 */
+.alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    max-width: 350px;
+}
+
+.alert {
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 搜索结果样式 */
+.search-result-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item a {
+    display: flex;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+}
+
+.search-result-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    margin-right: 10px;
+    border-radius: 4px;
+}
+
+.search-result-info {
+    flex: 1;
+}
+
+.search-result-info h6 {
+    margin: 0;
+    color: #333;
+}
+
+.search-result-info p {
+    margin: 0;
+    color: #28a745;
+    font-weight: 500;
+}
+
+/* 书籍卡片样式优化 */
+.book-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card-img-wrapper {
+    position: relative;
+    padding-top: 133%; /* 3:4 比例 */
+    overflow: hidden;
+}
+
+.card-img-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-img-overlay {
+    opacity: 0;
+    transition: opacity 0.2s;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+}
+
+.book-card:hover .card-img-overlay {
+    opacity: 1;
+}
+
+/* 按钮样式 */
+.btn-favorite, .btn-share {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    background: white;
+    color: #666;
+    border: none;
+    margin: 5px;
+}
+
+.btn-favorite:hover, .btn-share:hover {
+    background: #f8f9fa;
+    color: #333;
+}
+
+.btn-favorite.active {
+    color: #dc3545;
+}
+
+/* 分类导航样式 */
+.category-nav {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 0;
+}
+
+.category-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.category-nav .nav-link {
+    color: #666;
+    padding: 8px 16px;
+    margin: 0 4px;
+    border-radius: 20px;
+}
+
+.category-nav .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* 空状态样式 */
+.empty-state {
+    padding: 40px 20px;
+}
+
+.empty-state img {
+    max-width: 200px;
+    opacity: 0.5;
+}
+
+/* 分享按钮样式 */
+.share-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 15px;
+}
+
+.share-buttons .btn {
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.btn-weixin { background: #07C160; color: white; }
+.btn-weibo { background: #E6162D; color: white; }
+.btn-qq { background: #12B7F5; color: white; }
+
+/* 购物车样式 */
+.cart-dropdown {
+    min-width: 300px;
+    padding: 0;
+}
+
+.cart-items {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.cart-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.cart-total {
+    padding: 10px;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+/* 评论区样式 */
+.comments-section {
+    margin-top: 30px;
+}
+
+.comment {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.comment-meta {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.comment-content {
+    margin-left: 50px;
+}
+
+/* 用户信用评分样式 */
+.credit-score {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.credit-excellent { background-color: #28a745; color: white; }
+.credit-good { background-color: #17a2b8; color: white; }
+.credit-fair { background-color: #ffc107; color: black; }
+.credit-poor { background-color: #dc3545; color: white; }
+
+/* 订单状态样式 */
+.order-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.status-pending { background: #ffc107; color: black; }
+.status-paid { background: #28a745; color: white; }
+.status-shipped { background: #17a2b8; color: white; }
+.status-completed { background: #6c757d; color: white; }
+.status-cancelled { background: #dc3545; color: white; }
+
+/* 统计图表容器 */
+.stats-container {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .book-card {
+        margin-bottom: 15px;
+    }
+    
+    .share-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .cart-dropdown {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+    }
+}

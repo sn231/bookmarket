@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}我的消息{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>我的消息</h2>
+        {% for message in messages %}
+            <div class="card mb-3 {% if not message.is_read %}border-primary{% endif %}">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        关于：<a href="{% url 'books:book_detail' message.book.id %}">{{ message.book.title }}</a>
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        来自：{{ message.sender.username }}
+                    </h6>
+                    <p class="card-text">{{ message.content }}</p>
+                    <p class="card-text">
+                        <small class="text-muted">{{ message.created_at }}</small>
+                    </p>
+                    {% if not message.is_read %}
+                        <a href="{% url 'messages:mark_read' message.id %}" class="btn btn-sm btn-primary">标记为已读</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p>暂无消息</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

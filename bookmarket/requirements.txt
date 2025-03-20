@@ -1,0 +1,4 @@
+Django>=3.2,<4.0
+Pillow  # 用于处理图片上传
+mysqlclient  # MySQL数据库驱动
+django-crispy-forms  # 用于美化表单 
