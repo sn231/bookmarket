@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}我的购物车{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">我的购物车</h2>
+    
+    {% if cart_items %}
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>书籍</th>
+                                <th>单价</th>
+                                <th>数量</th>
+                                <th>小计</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                                <tr data-item-id="{{ item.id }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.book.image %}
+                                                <img src="{{ item.book.image.url }}" alt="{{ item.book.title }}" 
+                                                     class="img-thumbnail mr-3" style="width: 60px;">
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ item.book.title }}</h6>
+                                                <small class="text-muted">{{ item.book.author }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>¥{{ item.book.price }}</td>
+                                    <td>
+                                        <div class="input-group" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary btn-sm quantity-decrease" type="button">-</button>
+                                            <input type="number" class="form-control form-control-sm text-center quantity-input" 
+                                                   value="{{ item.quantity }}" min="1" max="{{ item.book.stock }}">
+                                            <button class="btn btn-outline-secondary btn-sm quantity-increase" type="button">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="item-total">¥{{ item.get_total_price }}</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm remove-item">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right"><strong>总计：</strong></td>
+                                <td colspan="2"><strong class="cart-total">¥{{ total_price }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-right mt-4">
+            <a href="{% url 'books:book_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i>继续购物
+            </a>
+            <a href="{% url 'orders:checkout' %}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart mr-1"></i>去结算
+            </a>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h4>购物车是空的</h4>
+            <p class="text-muted">快去看看有什么好书吧！</p>
+            <a href="{% url 'books:book_list' %}" class="btn btn-primary">
+                <i class="fas fa-book mr-1"></i>浏览书籍
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 更新数量
+    function updateQuantity(itemId, newQuantity) {
+        $.ajax({
+            url: `/cart/update/${itemId}/`,
+            method: 'POST',
+            data: {
+                quantity: newQuantity,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    $(`tr[data-item-id="${itemId}"] .item-total`).text(`¥${response.total_price}`);
+                    updateCartTotal();
+                } else {
+                    Swal.fire('错误', response.message, 'error');
+                }
+            }
+        });
+    }
+
+    // 更新购物车总价
+    function updateCartTotal() {
+        let total = 0;
+        $('.item-total').each(function() {
+            total += parseFloat($(this).text().replace('¥', ''));
+        });
+        $('.cart-total').text(`¥${total.toFixed(2)}`);
+    }
+
+    // 增加数量
+    $('.quantity-increase').click(function() {
+        const input = $(this).siblings('.quantity-input');
+        const currentValue = parseInt(input.val());
+        const maxValue = parseInt(input.attr('max'));
+        if (currentValue < maxValue) {
+            input.val(currentValue + 1);
+            const itemId = $(this).closest('tr').data('item-id');
+            updateQuantity(itemId, currentValue + 1);
+        }
+    });
+
+    // 减少数量
+    $('.quantity-decrease').click(function() {
+        const input = $(this).siblings('.quantity-input');
+        const currentValue = parseInt(input.val());
+        if (currentValue > 1) {
+            input.val(currentValue - 1);
+            const itemId = $(this).closest('tr').data('item-id');
+            updateQuantity(itemId, currentValue - 1);
+        }
+    });
+
+    // 手动输入数量
+    $('.quantity-input').change(function() {
+        const input = $(this);
+        const newValue = parseInt(input.val());
+        const maxValue = parseInt(input.attr('max'));
+        const itemId = input.closest('tr').data('item-id');
+        
+        if (newValue < 1) {
+            input.val(1);
+            updateQuantity(itemId, 1);
+        } else if (newValue > maxValue) {
+            input.val(maxValue);
+            updateQuantity(itemId, maxValue);
+        } else {
+            updateQuantity(itemId, newValue);
+        }
+    });
+
+    // 移除商品
+    $('.remove-item').click(function() {
+        const row = $(this).closest('tr');
+        const itemId = row.data('item-id');
+        
+        Swal.fire({
+            title: '确认移除',
+            text: '确定要将这本书从购物车中移除吗？',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '确定移除',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/cart/remove/${itemId}/`,
+                    method: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            row.fadeOut(300, function() {
+                                $(this).remove();
+                                updateCartTotal();
+                                if ($('tbody tr').length === 0) {
+                                    location.reload();
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,50 @@
+[
+    {
+        "model": "books.category",
+        "pk": 1,
+        "fields": {
+            "name": "教材教辅",
+            "slug": "textbook"
+        }
+    },
+    {
+        "model": "books.category",
+        "pk": 2,
+        "fields": {
+            "name": "文学小说",
+            "slug": "literature"
+        }
+    },
+    {
+        "model": "books.category",
+        "pk": 3,
+        "fields": {
+            "name": "计算机",
+            "slug": "computer"
+        }
+    },
+    {
+        "model": "books.category",
+        "pk": 4,
+        "fields": {
+            "name": "经济管理",
+            "slug": "economics"
+        }
+    },
+    {
+        "model": "books.category",
+        "pk": 5,
+        "fields": {
+            "name": "艺术设计",
+            "slug": "art"
+        }
+    },
+    {
+        "model": "books.category",
+        "pk": 6,
+        "fields": {
+            "name": "其他",
+            "slug": "others"
+        }
+    }
+] 

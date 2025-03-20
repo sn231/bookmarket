@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            {% if book.image %}
+                <img src="{{ book.image.url }}" class="img-fluid rounded" alt="{{ book.title }}">
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h2>{{ book.title }}</h2>
+            <p class="text-muted">作者: {{ book.author }}</p>
+            <p>
+                <span class="price-tag">¥{{ book.price }}</span>
+                <small class="text-muted ml-2">原价: ¥{{ book.original_price }}</small>
+            </p>
+            <p>
+                成色: <span class="condition-tag condition-{{ book.condition }}">
+                    {{ book.get_condition_display }}
+                </span>
+            </p>
+            <p>描述: {{ book.description }}</p>
+            <p>卖家: {{ book.seller.username }}</p>
+            
+            {% if user.is_authenticated and user != book.seller %}
+                <a href="{% url 'messages:message_create' book.id %}" class="btn btn-primary">
+                    <i class="fas fa-comment mr-1"></i>联系卖家
+                </a>
+            {% endif %}
+            
+            {% if user == book.seller %}
+                <div class="btn-group">
+                    <a href="{% url 'books:book_update' book.id %}" class="btn btn-warning">
+                        <i class="fas fa-edit mr-1"></i>编辑
+                    </a>
+                    <a href="{% url 'books:book_delete' book.id %}" class="btn btn-danger">
+                        <i class="fas fa-trash mr-1"></i>删除
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if message_history %}
+    <div class="row mt-4">
+        <div class="col-md-8 offset-md-2">
+            <h4>消息记录</h4>
+            <div class="message-history">
+                {% for msg in message_history %}
+                    <div class="message {% if msg.sender == user %}message-sent{% else %}message-received{% endif %}">
+                        <div class="message-content">
+                            {{ msg.content }}
+                        </div>
+                        <small class="text-muted">{{ msg.created_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if related_books %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <h4>卖家的其他书籍</h4>
+        </div>
+        {% for related_book in related_books %}
+            <div class="col-md-3">
+                <div class="card">
+                    {% if related_book.image %}
+                        <img src="{{ related_book.image.url }}" class="card-img-top" alt="{{ related_book.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="card-title">{{ related_book.title }}</h6>
+                        <p class="card-text">
+                            <span class="price-tag">¥{{ related_book.price }}</span>
+                        </p>
+                        <a href="{% url 'books:book_detail' related_book.id %}" class="btn btn-sm btn-primary">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

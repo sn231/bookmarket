@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}删除书籍{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>删除书籍</h2>
+        <div class="alert alert-danger">
+            <p>您确定要删除《{{ book.title }}》吗？此操作不可撤销。</p>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">确认删除</button>
+            <a href="{% url 'books:book_detail' book.id %}" class="btn btn-secondary">取消</a>
+        </form>
+    </div>
+</div>
+{% endblock %} 

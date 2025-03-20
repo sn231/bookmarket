@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}我的订单{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">我的订单</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>订单号</th>
+                            <th>商品</th>
+                            <th>总金额</th>
+                            <th>状态</th>
+                            <th>下单时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>
+                                    {% for item in order.items.all|slice:":2" %}
+                                        <div class="mb-1">
+                                            {{ item.book_title }}
+                                            {% if not forloop.last %}<br>{% endif %}
+                                        </div>
+                                    {% endfor %}
+                                    {% if order.items.count > 2 %}
+                                        <small class="text-muted">等{{ order.items.count }}件商品</small>
+                                    {% endif %}
+                                </td>
+                                <td>¥{{ order.total_amount }}</td>
+                                <td>
+                                    <span class="badge badge-{{ order.status|yesno:'success,warning,danger' }}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{% url 'orders:order_detail' order.pk %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            查看详情
+                                        </a>
+                                        {% if order.status == 'pending' %}
+                                            <a href="{% url 'orders:pay_order' order.pk %}" 
+                                               class="btn btn-sm btn-success">
+                                                去支付
+                                            </a>
+                                            <a href="{% url 'orders:cancel_order' order.pk %}" 
+                                               class="btn btn-sm btn-danger cancel-order">
+                                                取消订单
+                                            </a>
+                                        {% elif order.status == 'shipped' %}
+                                            <a href="{% url 'orders:confirm_receipt' order.pk %}" 
+                                               class="btn btn-sm btn-success confirm-receipt">
+                                                确认收货
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-box-open fa-3x mb-3"></i>
+                                        <h5>暂无订单</h5>
+                                        <p>快去看看有什么好书吧！</p>
+                                        <a href="{% url 'books:book_list' %}" class="btn btn-primary">
+                                            <i class="fas fa-book mr-1"></i>浏览书籍
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 取消订单确认
+    $('.cancel-order').click(function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        
+        Swal.fire({
+            title: '确认取消订单',
+            text: '取消订单后，该订单将无法恢复',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '确认取消',
+            cancelButtonText: '返回'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    });
+
+    // 确认收货确认
+    $('.confirm-receipt').click(function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        
+        Swal.fire({
+            title: '确认收货',
+            text: '请确认已收到商品且商品完好',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '确认收货',
+            cancelButtonText: '返回'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 
